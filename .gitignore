@@ -6,3 +6,8 @@ cmake-*
 *.so
 *.elf
 
+.idea
+.DS_Store
+
+__files
+
