@@ -26,10 +26,11 @@
 
 #define HEAP_SIZE 2048
 
+#define USE_EMBEDDED_ELF 1
+
 /* Macros =================================================================== */
 /* Enums ==================================================================== */
 /* Types ==================================================================== */
-// typedef Elf32_Addr (*elf_symbol_resolver_t)(const char *name);
 
 /* Variables ================================================================ */
 device_t device;
@@ -75,7 +76,7 @@ void project_main(void) {
   os_heap_create(&heap, heap_buffer, HEAP_SIZE);
   os_use_heap(&heap);
 
-#if 1
+#if USE_EMBEDDED_ELF
   log_info("__module_data=%p", __module_data);
 
   module_t mod;
