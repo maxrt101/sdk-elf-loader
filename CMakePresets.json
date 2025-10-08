@@ -15,17 +15,6 @@
             },
             "binaryDir": "${sourceDir}/cmake-build-stm32f100-debug",
             "generator": "Unix Makefiles"
-        },
-        {
-            "name": "STM32L051 Debug",
-            "displayName": "STM32L051 - Debug",
-            "description": "STM32L051 - Debug",
-            "cacheVariables": {
-                "BOARD": "STM32L051",
-                "CMAKE_BUILD_TYPE": "DEBUG"
-            },
-            "binaryDir": "${sourceDir}/cmake-build-stm32l051-debug",
-            "generator": "Unix Makefiles"
         }
     ],
     "buildPresets": [],
