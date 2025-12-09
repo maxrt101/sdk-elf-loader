@@ -1,30 +1,43 @@
 /** ========================================================================= *
- *
- * @file sh_cmd_reset.c
- * @date 13-11-2024
+*
+ * @file hal_wdt.c
+ * @date 27-10-2025
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
  *
- * @brief 'reset' CLI Command implementation
+ * @brief Port implementation of SDK WDT HAL
  *
  *  ========================================================================= */
 
 /* Includes ================================================================= */
-#include "shell/shell.h"
-#include "os/reset/reset.h"
+#include "hal/wdt/wdt.h"
 
 /* Defines ================================================================== */
-#define LOG_TAG SHELL
+#define LOG_TAG hal_wdt
 
 /* Macros =================================================================== */
-/* Exposed macros =========================================================== */
 /* Enums ==================================================================== */
 /* Types ==================================================================== */
 /* Variables ================================================================ */
 /* Private functions ======================================================== */
 /* Shared functions ========================================================= */
-static int8_t cmd_reset(shell_t * sh, uint8_t argc, const char ** argv) {
-  os_reset(OS_RESET_SOFT);
-  return SHELL_OK;
+void wdt_init(void) {
+#if USE_WDG
+  MX_IWDG_Init();
+#endif
 }
 
-SHELL_DECLARE_COMMAND(reset, cmd_reset, "Reset device (restart)");
+void wdt_feed(void) {
+#if USE_WDG
+  LL_IWDG_ReloadCounter(IWDG);
+#endif
+}
+
+__NORETURN void wdt_reboot(void) {
+#if USE_WDG
+  LL_IWDG_EnableWriteAccess(IWDG);
+  LL_IWDG_SetReloadCounter(IWDG, 0);
+  LL_IWDG_DisableWriteAccess(IWDG);
+  LL_IWDG_ReloadCounter(IWDG);
+#endif
+  while (1) {}
+}

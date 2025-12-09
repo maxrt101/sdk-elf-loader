@@ -1,21 +1,27 @@
+
 /** ========================================================================= *
  *
- * @file bsp_console.c
- * @date 30-08-2024
+ * @file console.c
+ * @date 27-10-2025
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
+ *
+ * @brief Port for VFS Console
  *
  *  ========================================================================= */
 
 /* Includes ================================================================= */
 #include <string.h>
-#include "lib/log/log.h"
-#include "lib/vfs/vfs.h"
-#include "lib/error/assertion.h"
+
+#include "bsp.h"
+#include "log/log.h"
+#include "vfs/vfs.h"
+#include "error/assertion.h"
 #include "hal/uart/uart.h"
-#include "project.h"
+#include "atomic/atomic.h"
+#include "time/sleep.h"
 
 /* Defines ================================================================== */
-#define LOG_TAG                 CONSOLE_PORT
+#define LOG_TAG                 console
 #define CONSOLE_READ_TIMEOUT_MS 100
 
 /* Macros =================================================================== */
@@ -23,14 +29,13 @@
 /* Types ==================================================================== */
 /* Variables ================================================================ */
 typedef struct {
-  uart_t *  uart;               /** Console UART handle */
-  bool      write_flag;         /** Indicates that a write happened */
-  bool      read_timeout_flag;  /** Indicates that a read timeout should be used */
-  bool      reset_on_next_flag; /** Should reset device on next occasion */
-  timeout_t read_timeout;       /** Timeout for read operation */
+  uart_t *  uart;         /** Console UART handle */
+  struct {
+    bool write_happend;   /** Indicates that a write happened */
+  } flags;
 } console_ctx_t;
 
-static console_ctx_t console_ctx = {NULL, false, false};
+static console_ctx_t console_ctx = {NULL, false};
 
 /* Private functions ======================================================== */
 error_t console_open(void * ctx, vfs_file_t * file) {
@@ -45,22 +50,19 @@ error_t console_open(void * ctx, vfs_file_t * file) {
   return E_OK;
 }
 
-error_t console_read(void * ctx, vfs_file_t * file, uint8_t * buffer, size_t size) {
+error_t console_read(void * ctx, vfs_file_t * file, uint8_t * buffer, size_t size, vfs_read_flags_t flags) {
   ASSERT_RETURN(ctx, E_NULL);
   console_ctx_t * console = (console_ctx_t *) ctx;
 
-  if (console->reset_on_next_flag) {
-    uart_reset(console->uart);
-    console->reset_on_next_flag = false;
-  }
+  timeout_t t;
 
-  if (console->read_timeout_flag) {
-    timeout_start(&console->read_timeout, CONSOLE_READ_TIMEOUT_MS);
+  if (flags & VFS_READ_FLAG_NOBLOCK) {
+    timeout_start(&t, 0);
   }
 
   return uart_recv(
       console->uart, buffer, size,
-      console->read_timeout_flag ? &console->read_timeout : NULL
+      flags & VFS_READ_FLAG_NOBLOCK ? &t : NULL
   );
 }
 
@@ -69,18 +71,13 @@ error_t console_write(void * ctx, vfs_file_t * file, const uint8_t * buffer, siz
 
   console_ctx_t * console = (console_ctx_t *) ctx;
 
-  if (console->reset_on_next_flag) {
-    uart_reset(console->uart);
-    console->reset_on_next_flag = false;
-  }
-
-  console->write_flag = true;
+  console->flags.write_happend = true;
 
   error_t err = E_OK;
 
-//  ATOMIC_BLOCK() {
+  ATOMIC_BLOCK() {
     err = uart_send(console->uart, buffer, size);
-//  }
+  }
 
   return err;
 }
@@ -112,24 +109,14 @@ error_t console_ioctl(void * ctx, vfs_file_t * file, int cmd, va_list args) {
       break;
     }
 
-    case VFS_IOCTL_RESET_DEVICE_DEFERRED: {
-      console->reset_on_next_flag = true;
-      break;
-    }
-
     case VFS_IOCTL_WRITE_DETECTED: {
       bool * result = va_arg(args, bool*);
-      *result = console->write_flag;
+      *result = console->flags.write_happend;
       break;
     }
 
     case VFS_IOCTL_WRITE_DETECTED_CLEAR: {
-      console->write_flag = false;
-      break;
-    }
-
-    case VFS_IOCTL_READ_TIMEOUT_ENABLE: {
-      console->read_timeout_flag = va_arg(args, int);
+      console->flags.write_happend = false;
       break;
     }
 
@@ -140,20 +127,24 @@ error_t console_ioctl(void * ctx, vfs_file_t * file, int cmd, va_list args) {
   return E_OK;
 }
 
-uart_t * console_get_uart(void) {
-  return console_ctx.uart;
-}
-
 /* Shared functions ========================================================= */
-error_t bsp_console_init(device_t * dev) {
-  ASSERT_RETURN(dev, E_NULL);
-
-  return vfs_create_block(&vfs, CONSOLE_FILE, &(vfs_block_data_t){
+error_t console_init(vfs_t * vfs) {
+  ERROR_CHECK_RETURN(vfs_create_block(vfs, CONSOLE_FILE, &(vfs_block_data_t){
     &console_ctx,
     console_open,
     NULL,
     console_read,
     console_write,
     console_ioctl,
-  });
+  }));
+
+  VFS_WITH(vfs, console, CONSOLE_FILE) {
+    vfs_set_multi_open_flag(console, true);
+  }
+
+  return E_OK;
+}
+
+uart_t * console_get_uart(void) {
+  return console_ctx.uart;
 }

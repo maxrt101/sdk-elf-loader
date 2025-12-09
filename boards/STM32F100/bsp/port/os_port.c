@@ -3,7 +3,6 @@
  * @file os_port.c
  * @date 19-08-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
- * @copyright GrainMole
  *
  * @brief Port implementation of SDK sys library
  *

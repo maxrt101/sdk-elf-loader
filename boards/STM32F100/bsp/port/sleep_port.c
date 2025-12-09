@@ -3,7 +3,6 @@
  * @file bsp.c
  * @date 20-07-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
- * @copyright GrainMole
  *
  * @brief Port implementation of SDK sleep functions
  *

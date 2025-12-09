@@ -3,13 +3,13 @@
  * @file bsp.c
  * @date 20-07-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
- * @copyright GrainMole
  *
  *  ========================================================================= */
 
 /* Includes ================================================================= */
-#include "bsp.h"
+#include "error/assertion.h"
 #include "project.h"
+#include "bsp.h"
 
 /* Defines ================================================================== */
 /* Macros =================================================================== */
@@ -17,7 +17,15 @@
 /* Types ==================================================================== */
 /* Variables ================================================================ */
 /* Private functions ======================================================== */
+error_t console_init(vfs_t * vfs);
+
 /* Shared functions ========================================================= */
 void bsp_init(device_t * dev) {
   HAL_MspInit();
+}
+
+error_t bsp_init_vfs_files(vfs_t * vfs) {
+  ERROR_CHECK_RETURN(console_init(vfs));
+
+  return E_OK;
 }

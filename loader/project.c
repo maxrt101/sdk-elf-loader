@@ -27,6 +27,7 @@
 #define HEAP_SIZE 2048
 
 #define USE_EMBEDDED_ELF 1
+#define RUN_EMBEDDED_ELF 0
 
 /* Macros =================================================================== */
 /* Enums ==================================================================== */
@@ -34,7 +35,6 @@
 
 /* Variables ================================================================ */
 device_t device;
-vfs_t vfs;
 VFS_DECLARE_NODE_POOL(vfs_node_pool, 8);
 VFS_DECLARE_TABLE_POOL(vfs_table_pool, 8);
 
@@ -61,9 +61,15 @@ MODULE_EXPORT_API(log_fmt);
 void project_main(void) {
   bsp_init(&device);
 
+  // Initialize root vfs
   vfs_init(&vfs, &vfs_node_pool, &vfs_table_pool);
+
+  // Create /dev folder
   vfs_mkdir(&vfs, "/dev");
-  bsp_console_init(&device);
+
+  bsp_init_vfs_files(&vfs);
+
+  // Initialize log
   log_init(vfs_open(&vfs, CONSOLE_FILE));
 
   log_info("Startup");
@@ -77,6 +83,9 @@ void project_main(void) {
   os_use_heap(&heap);
 
 #if USE_EMBEDDED_ELF
+  log_info("Embedded PIC module ELF data is at %p", __module_data);
+
+#if RUN_EMBEDDED_ELF
   log_info("__module_data=%p", __module_data);
 
   module_t mod;
@@ -93,6 +102,7 @@ void project_main(void) {
 
   log_info("runtime=%d", runtime_get());
   log_info("res=%d", mod_main());
+#endif
 #endif
 
   shell_t shell;

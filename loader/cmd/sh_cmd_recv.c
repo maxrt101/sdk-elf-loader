@@ -10,11 +10,11 @@
 
 /* Includes ================================================================= */
 #include "shell/shell.h"
+#include "shell/shell_util.h"
 #include "time/sleep.h"
 #include "log/log.h"
 #include "hal/uart/uart.h"
 #include "storage/storage.h"
-#include "sh_cmd.h"
 #include "project.h"
 
 /* Defines ================================================================== */
@@ -47,9 +47,9 @@ static int8_t cmd_recv(shell_t * sh, uint8_t argc, const char ** argv) {
   for (uint32_t i = 0; i < size; ++i) {
     uint8_t buffer;
 
-    SH_ERR_REPORT_RETURN(uart_recv(console_get_uart(), &buffer, 1, NULL), "uart_recv");
+    SHELL_ERR_REPORT_RETURN(uart_recv(console_get_uart(), &buffer, 1, NULL), "uart_recv");
 
-    SH_ERR_REPORT_RETURN(vfs_write(file, &buffer, 1), "vfs_write");
+    SHELL_ERR_REPORT_RETURN(vfs_write(file, &buffer, 1), "vfs_write");
   }
 
   vfs_close(file);

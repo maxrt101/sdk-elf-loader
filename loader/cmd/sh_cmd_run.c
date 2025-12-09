@@ -1,17 +1,22 @@
 /** ========================================================================= *
- *
- * @file sh_cmd_if.c
- * @date 13-11-2024
+*
+ * @file sh_cmd_run.c
+ * @date 09-12-2025
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
  *
- * @brief 'if' CLI Command implementation
+ * @brief 'run' CLI Command implementation
  *
  *  ========================================================================= */
 
 /* Includes ================================================================= */
+#include <loader/loader.h>
+
 #include "shell/shell.h"
+#include "shell/shell_util.h"
+#include "time/sleep.h"
 #include "log/log.h"
-#include <string.h>
+#include "storage/storage.h"
+#include "project.h"
 
 /* Defines ================================================================== */
 #define LOG_TAG SHELL
@@ -23,30 +28,30 @@
 /* Variables ================================================================ */
 /* Private functions ======================================================== */
 /* Shared functions ========================================================= */
-static int8_t cmd_if(shell_t * sh, uint8_t argc, const char ** argv) {
-  if (argc < 3) {
-    log_error("Usage: if \"CONDITION\" \"THEN\" [\"ELSE\"]");
+static int8_t cmd_run(shell_t * sh, uint8_t argc, const char ** argv) {
+  if (argc != 2) {
+    log_error("Usage: run ADDR");
     return SHELL_FAIL;
   }
 
-  char condition[SHELL_MAX_LINE_SIZE];
-  char then_branch[SHELL_MAX_LINE_SIZE];
-  char else_branch[SHELL_MAX_LINE_SIZE];
+  void * module_data = (void *) shell_parse_int(argv[1]);
 
-  strcpy(condition, argv[1]);
-  strcpy(then_branch, argv[2]);
+  log_info("module_data=%p", module_data);
 
-  if (argc == 4) {
-    strcpy(else_branch, argv[3]);
-  }
+  module_t mod;
 
-  if (shell_execute(sh, condition) == SHELL_OK) {
-    return shell_execute(sh, then_branch);
-  } else if (argc == 4) {
-    return shell_execute(sh, else_branch);
-  }
+  SHELL_ERR_REPORT_RETURN(module_load(&mod, module_data), "module_load");
+
+  SHELL_ERR_REPORT_RETURN(elf_dump(&mod.elf), "elf_dump");
+
+  int (*mod_main)() = NULL;
+
+  SHELL_ERR_REPORT_RETURN(module_get_symbol(&mod, (void **) &mod_main, "main"), "elf_get_symbol");
+
+  log_info("main=%p", mod_main);
+  log_info("res=%d", mod_main());
 
   return SHELL_OK;
 }
 
-SHELL_DECLARE_COMMAND(if, cmd_if, "Conditional execution");
+SHELL_DECLARE_COMMAND(run, cmd_run, "Run ELF file by address");

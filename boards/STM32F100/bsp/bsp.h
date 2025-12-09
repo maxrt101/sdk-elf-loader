@@ -3,7 +3,6 @@
  * @file bsp.h
  * @date 20-07-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
- * @copyright GrainMole
  *
  *  ========================================================================= */
 #pragma once
@@ -29,9 +28,9 @@ extern "C" {
 void bsp_init(device_t * dev);
 
 /**
- *
+ * Init /dev/console
  */
-error_t bsp_console_init(device_t * dev);
+error_t bsp_init_vfs_files(vfs_t * vfs);
 
 #ifdef __cplusplus
 }

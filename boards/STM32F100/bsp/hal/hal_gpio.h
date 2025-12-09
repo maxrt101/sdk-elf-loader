@@ -1,9 +1,8 @@
 /** ========================================================================= *
  *
- * @file gpio_port.h
+ * @file hal_gpio.h
  * @date 20-07-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
- * @copyright GrainMole
  *
  * @brief Port implementation of SDK GPIO HAL
  *

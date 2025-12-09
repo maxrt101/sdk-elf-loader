@@ -1,0 +1,23 @@
+using sysbus
+
+# Create machine
+mach create "stm32f100"
+
+# Copy machine platform from STM32L072
+machine LoadPlatformDescription @platforms/cpus/stm32f103.repl
+
+# Load compiled ELF
+sysbus LoadELF @cmake-build-stm32f100-debug/app/ELFLoaderApp.elf
+
+# Will show USART1 window (though using run.sh/console.sh makes this redundant)
+showAnalyzer usart1
+
+# USART1 to PTY Terminal Redirection
+emulation CreateUartPtyTerminal "console" "/tmp/renode-sdk-elf-loader-console"
+connector Connect sysbus.usart1 console
+
+# USART1 to Socket Terminal Redirection
+#emulation CreateServerSocketTerminal 4242 "console"
+#connector Connect sysbus.usart1 console
+
+start

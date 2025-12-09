@@ -1,9 +1,8 @@
 /** ========================================================================= *
  *
- * @file bsp_uart.c
+ * @file hal_uart.c
  * @date 23-07-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
- * @copyright GrainMole
  *
  * @brief Port implementation of SDK UART HAL API
  *

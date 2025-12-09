@@ -1,6 +1,6 @@
 /** ========================================================================= *
  *
- * @file bsp_nvm.c
+ * @file hal_nvm.c
  * @date 09-08-2024
  * @author Maksym Tkachuk <max.r.tkachuk@gmail.com>
  *

@@ -10,10 +10,10 @@
 
 /* Includes ================================================================= */
 #include "shell/shell.h"
+#include "shell/shell_util.h"
 #include "time/sleep.h"
 #include "log/log.h"
 #include "storage/storage.h"
-#include "sh_cmd.h"
 #include "project.h"
 
 /* Defines ================================================================== */
@@ -29,12 +29,12 @@
 static int8_t cmd_sync(shell_t * sh, uint8_t argc, const char ** argv) {
   if (argc > 1) {
     if (!strcmp(argv[1], "--dump")) {
-      SH_ERR_REPORT_RETURN(storage_dump(GET_STORAGE_PTR()), "storage_dump");
+      SHELL_ERR_REPORT_RETURN(storage_dump(GET_STORAGE_PTR()), "storage_dump");
     } else {
-      SH_ERR_REPORT_RETURN(storage_save_file(&vfs, GET_STORAGE_PTR(), argv[1]), "storage_save_file");
+      SHELL_ERR_REPORT_RETURN(storage_save_file(&vfs, GET_STORAGE_PTR(), argv[1]), "storage_save_file");
     }
   } else {
-    SH_ERR_REPORT_RETURN(storage_load_all(&vfs, GET_STORAGE_PTR()), "storage_load_all");
+    SHELL_ERR_REPORT_RETURN(storage_load_all(&vfs, GET_STORAGE_PTR()), "storage_load_all");
   }
 
   return SHELL_OK;
