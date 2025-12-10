@@ -15,6 +15,17 @@
             },
             "binaryDir": "${sourceDir}/cmake-build-stm32f100-debug",
             "generator": "Unix Makefiles"
+        },
+        {
+            "name": "STM32F103 Debug",
+            "displayName": "STM32F103 - Debug",
+            "description": "STM32F103 Debug",
+            "cacheVariables": {
+                "BOARD": "STM32F103",
+                "CMAKE_BUILD_TYPE": "DEBUG"
+            },
+            "binaryDir": "${sourceDir}/cmake-build-stm32f103-debug",
+            "generator": "Unix Makefiles"
         }
     ],
     "buildPresets": [],
