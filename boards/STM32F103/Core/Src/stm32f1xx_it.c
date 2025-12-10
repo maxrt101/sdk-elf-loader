@@ -20,11 +20,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_it.h"
-
-#include "os/abort/abort.h"
-#include "time/time.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "os/abort/abort.h"
+#include "time/time.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

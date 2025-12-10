@@ -1,13 +1,13 @@
 using sysbus
 
 # Create machine
-mach create "stm32f100"
+mach create "stm32f103"
 
 # Copy machine platform from STM32F103
 machine LoadPlatformDescription @platforms/cpus/stm32f103.repl
 
 # Load compiled ELF
-sysbus LoadELF @cmake-build-stm32f100-debug/app/ELFLoaderApp.elf
+sysbus LoadELF @cmake-build-stm32f103-debug/app/ELFLoaderApp.elf
 
 # Will show USART1 window (though using run.sh/console.sh makes this redundant)
 showAnalyzer usart1
