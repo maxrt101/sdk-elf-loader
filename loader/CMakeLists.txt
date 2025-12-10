@@ -35,7 +35,7 @@ set(FEATURES
 
     # VFS
     "USE_GLOBAL_VFS=1"
-    "VFS_IOCTL_CMD_PORT=VFS_IOCTL_RESET_DEVICE, VFS_IOCTL_WRITE_DETECTED, VFS_IOCTL_WRITE_DETECTED_CLEAR"
+    "VFS_IOCTL_CMD_PORT=VFS_IOCTL_RESET_DEVICE,VFS_IOCTL_WRITE_DETECTED,VFS_IOCTL_WRITE_DETECTED_CLEAR"
 
     # OS Allocator
     "USE_OS_HEAP_DEFRAG_ON_FREE=1"
@@ -92,6 +92,7 @@ set(FEATURES
 # Include utils
 include(${SDK_DIR}/toolchain/project.cmake)
 include(${SDK_DIR}/toolchain/utils.cmake)
+include(${SDK_DIR}/toolchain/modules/freertos.cmake)
 
 # Setup project
 project_init()
@@ -162,3 +163,5 @@ project_add_ld_paths("${SDK_DIR}/lib/loader/")
 project_add_ld_paths("${SDK_DIR}/lib/shell")
 
 project_finish()
+
+freertos_configure(${PROJECT_DIR}/boards/${BOARD}/bsp/cfg)

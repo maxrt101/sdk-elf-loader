@@ -15,19 +15,26 @@
 #include "shell/shell.h"
 #include "time/time.h"
 #include "log/log.h"
+#include "posix/posix.h"
 
 #include "loader/loader.h"
 #include "elf/elf.h"
 
 #include "module.h"
 
+#include <FreeRTOS.h>
+#include <task.h>
+
 /* Defines ================================================================== */
 #define LOG_TAG MAIN
 
-#define HEAP_SIZE 2048
+#define HEAP_SIZE 1024
 
 #define USE_EMBEDDED_ELF 1
 #define RUN_EMBEDDED_ELF 0
+
+#define MAIN_TASK_STACK_SIZE  256
+#define MAIN_TASK_PRIORITY    (tskIDLE_PRIORITY + 1)
 
 /* Macros =================================================================== */
 /* Enums ==================================================================== */
@@ -38,12 +45,28 @@ device_t device;
 VFS_DECLARE_NODE_POOL(vfs_node_pool, 8);
 VFS_DECLARE_TABLE_POOL(vfs_table_pool, 8);
 
+shell_t shell;
+
 static os_heap_t heap;
 static uint8_t heap_buffer[HEAP_SIZE];
+
+static StackType_t  main_task_stack[MAIN_TASK_STACK_SIZE];
+static StaticTask_t main_task_tcb;
+static TaskHandle_t main_task_handle = NULL;
 
 /* Private functions ======================================================== */
 void error_handler_port(error_t error, int line, const char * file) {
   os_abort("%s at %s:%d", error2str(error), file, line);
+}
+
+static void main_task(void * arg) {
+  shell_init(&shell, vfs_open(&vfs, CONSOLE_FILE), NULL);
+
+  shell_start(&shell);
+
+  while (1) {
+    shell_process(&shell);
+  }
 }
 
 // TODO: ELF utils. This + elf_dump_* + maybe general ELF APIs (get_section, get_symbol, etc)
@@ -72,12 +95,14 @@ void project_main(void) {
   // Initialize log
   log_init(vfs_open(&vfs, CONSOLE_FILE));
 
+  posix_init(vfs_open(&vfs, CONSOLE_FILE), &shell);
+
   log_info("Startup");
 
-  if (storage_check(GET_STORAGE_PTR()) == E_CORRUPT) {
-    log_warn("Storage is corrupt, erasing...");
-    storage_init(GET_STORAGE_PTR());
-  }
+  // if (storage_check(GET_STORAGE_PTR()) == E_CORRUPT) {
+  //   log_warn("Storage is corrupt, erasing...");
+  //   storage_init(GET_STORAGE_PTR());
+  // }
 
   os_heap_create(&heap, heap_buffer, HEAP_SIZE);
   os_use_heap(&heap);
@@ -105,12 +130,17 @@ void project_main(void) {
 #endif
 #endif
 
-  shell_t shell;
-  shell_init(&shell, vfs_open(&vfs, CONSOLE_FILE), NULL);
+  main_task_handle = xTaskCreateStatic(
+    main_task,
+    "main",
+    MAIN_TASK_STACK_SIZE,
+    NULL,
+    MAIN_TASK_PRIORITY,
+    main_task_stack,
+    &main_task_tcb
+  );
 
-  shell_start(&shell);
+  log_info("Launching into multitask...");
 
-  while (1) {
-    shell_process(&shell);
-  }
+  vTaskStartScheduler();
 }
