@@ -27,6 +27,7 @@
 /* Private functions ======================================================== */
 /* Shared functions ========================================================= */
 static int8_t cmd_sync(shell_t * sh, uint8_t argc, const char ** argv) {
+#if 0
   if (argc > 1) {
     if (!strcmp(argv[1], "--dump")) {
       SHELL_ERR_REPORT_RETURN(storage_dump(GET_STORAGE_PTR()), "storage_dump");
@@ -36,6 +37,7 @@ static int8_t cmd_sync(shell_t * sh, uint8_t argc, const char ** argv) {
   } else {
     SHELL_ERR_REPORT_RETURN(storage_load_all(&vfs, GET_STORAGE_PTR()), "storage_load_all");
   }
+#endif
 
   return SHELL_OK;
 }

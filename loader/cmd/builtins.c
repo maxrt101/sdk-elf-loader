@@ -34,7 +34,6 @@ SHELL_DECLARE_COMMAND(repeat, builtin_repeat, "Repeat subcommand");
 SHELL_DECLARE_COMMAND(reset, builtin_reset, "Reset device (restart)");
 SHELL_DECLARE_COMMAND(sh, builtin_sh, "Shell control");
 SHELL_DECLARE_COMMAND(sleep, builtin_sleep, "Sleep ms");
-SHELL_DECLARE_COMMAND(task, builtin_task, "Task control");
 SHELL_DECLARE_COMMAND(time, builtin_time, "Reports system time (ms tick)");
 SHELL_DECLARE_COMMAND(tty, builtin_tty, "TTY control");
 
